@@ -13,7 +13,8 @@ function App() {
     const [userFromLS, setUserFromLS] = useState()
     const [show, setShow] = useState(false)
 
-    const user = localStorage.getItem('user')
+    const user = localStorage.getItem('user_email')
+    const role = localStorage.getItem('user_role')
 
     useEffect(() => {
         if(user === null) {
@@ -41,6 +42,7 @@ function App() {
                   <div className="reg_login">
                       <Link to="/logout" onClick={() => setShow(false)}>Logout</Link>
                       <Redirect to='/welcome'/>
+                      <h4>your role is: {role}</h4>
                   </div>
               </>
           }
@@ -55,7 +57,7 @@ function App() {
             <Route  path="/registration" component={RegistrationForm}/>
             <Route  path="/login"> <LoginForm check={setLogin}/> </Route>
             <Route  path="/main" component={StartPage}/>
-            <Route  path="/welcome" component={WelcomePage}/>
+            <Route  path="/welcome"> <WelcomePage check={login}/> </Route>
         </Switch>
     </div>
       </BrowserRouter>

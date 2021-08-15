@@ -1,4 +1,5 @@
 const User = require("./models/User")
+const Role = require("./models/Role")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 const {validationResult} = require("express-validator")
@@ -7,13 +8,12 @@ dotenv.config({path:__dirname+'/.env'})
 
 const secret = process.env.SECRET
 
-const generateToken = (id, roles) =>{
+const generateToken = (_id, roles) =>{
     const payload = {
-        id,
+        _id,
         roles
     }
     return jwt.sign(payload,secret,{expiresIn: "24h"})
-
 }
 
 class AuthController{
@@ -24,23 +24,24 @@ class AuthController{
             if(!errors.isEmpty()){
                 return res.status(400).json({message: "Registration error", errors})
             }
-            const{first_name, last_name, email, password} = req.body
+            const {first_name, last_name, email, password, roles} = req.body
             const condidate = await User.findOne({email})
 
             if(condidate){
                return res.status(400).json({message: "User with this email is already exists"})
             } else {
                 const hashPassword = bcrypt.hashSync(password, 10)
+                const userRoleFromDB = await Role.findOne({value: roles[0]})
+
 
                 const user = new User({
                     first_name,
                     last_name,
                     email,
-                    password: hashPassword
+                    password: hashPassword,
+                    roles:[userRoleFromDB.value]
                 })
-
                 await user.save()
-
                 return res.json({message: "New user has been registered"})
             }
 
@@ -94,18 +95,41 @@ class AuthController{
         }
     }
 
-    // async logout(req, res) {
-    //     try{
-    //         let {email} = req.body
-    //         console.log(req.body)
-    //         const user =  await User.deleteOne({email})
-    //         if(user.deletedCount){
-    //             return res.status(200).json({message: "successfully logouted from account"})
-    //         }
-    //     } catch (e) {
-    //         console.log(e)
-    //     }
-    // }
+    async admin(req, res) {
+        try{
+            const token = req.headers.authorization.split(" ")[1]
+            const {_id, roles} = jwt.verify(token, secret)
+
+            if(roles[0] === "ADMIN"){
+                const users = await User.find({_id: {$ne: _id}, roles: {$nin : ["ADMIN", "SUPER_ADMIN"]}})
+
+                res.json(users)
+            }
+
+            if(roles[0] === "SUPER_ADMIN"){
+                const users = await User.find({_id: {$ne: _id}, roles: {$ne: "SUPER_ADMIN"} })
+
+                res.json(users)
+            }
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    async deleteUser(req, res) {
+        try{
+            const {userId} = req.params
+
+            const user = await User.deleteOne({_id: userId})
+            if (!user) {
+                res.status(404).json({message: 'User not found'})
+                return
+            }
+            return res.status(200).json({message: "User has been deleted"})
+        } catch (e) {
+            console.log(e)
+        }
+    }
 }
 
 module.exports = new AuthController()

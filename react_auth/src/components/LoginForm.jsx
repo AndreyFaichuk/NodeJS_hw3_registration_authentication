@@ -28,7 +28,8 @@ const LoginForm = (props) => {
         axios.post('http://localhost:3000/auth/login', user)
             .then(response => {
                 localStorage.setItem('token', response.data.token)
-                localStorage.setItem('user', response.data.user.email)
+                localStorage.setItem('user_email', response.data.user.email)
+                localStorage.setItem('user_role', response.data.user.roles[0])
 
                 setButtonStyle("buttonRegister green")
                 setInputStyle("green")

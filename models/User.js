@@ -1,4 +1,5 @@
 const {Schema, model} = require("mongoose")
+const Role = require("./Role")
 
 const User = new Schema({
     first_name: {
@@ -17,7 +18,8 @@ const User = new Schema({
     password: {
         type: String,
         required: true
-    }
-}, { versionKey: false })
+    },
+    roles: [{type: String, ref: "Role"}]
+}, {versionKey: false})
 
 module.exports = model("User", User)

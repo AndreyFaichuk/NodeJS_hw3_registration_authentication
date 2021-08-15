@@ -4,7 +4,8 @@ const Logout = (props) => {
 
     const logout = () => {
         localStorage.removeItem("token")
-        localStorage.removeItem("user")
+        localStorage.removeItem("user_email")
+        localStorage.removeItem("user_role")
 
         props.check(() => true)
     }

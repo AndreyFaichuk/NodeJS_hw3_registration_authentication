@@ -9,7 +9,6 @@ dotenv.config({path:__dirname+'/.env'})
 const URL_MONGO = process.env.URL_MONGODB
 const PORT = process.env.PORT || 3000
 
-
 const app = express()
 app.use(express.json())
 
@@ -23,7 +22,7 @@ app.use((req, res, next) => {
 app.use("/auth", authRouter)
 
 app.get("/main", controller.main)
-// app.delete("/logout", controller.logout)
+
 
 const start = async () => {
     try{
